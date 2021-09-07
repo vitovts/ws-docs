@@ -1,0 +1,67 @@
+MASTER
+Create LXC - Add Features keyctl / Nesting - start LXC
+ssh> 
+apt update && apt upgrade
+apt install vim mc net-tools curl
+Docker:
+curl https://get.docker.com/ | bash
+Docker Compose:
+curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+docker run hello-world
+docker-compose --version
+ADD USER: 
+Создаём каталог для $JENKINS_HOME и $HOME для пользователя 
+(/home/jenkins для RSA ключей, в /jenkins будут данные самого Jenkins):
+mkdir /jenkins
+mkdir /home/jenkins
+ADD GROUP:
+Создаём группу с GID 20000, что бы избежать проблем с правами в контейнере и на хосте 
+(запускать будем от пользователя jenkins, у него на хосте UID 1001, в контейнере пользователь с UID 1000, 
+а UID 1000 на хосте — пользователь ubuntu):
+groupadd --gid 20000 jenkins
+
+useradd -d /home/jenkins --uid 20000 --gid 20000 -s /bin/bash jenkins
+
+usermod -aG docker jenkins
+
+chown jenkins:jenkins /jenkins/
+chown jenkins:jenkins /home/jenkins/
+
+su -l jenkins
+ssh-keygen -t rsa
+cat .ssh/id_rsa.pub >>> slave /home/jenkins/.ssh/authorized_keys
+
+su -l jenkins
+ssh jenkins@ip -i .ssh/id_rsa /// ssh jn-n1 >> /etc/host
+
+
+vim jenkins-compose.json
+<EOF>
+version: '3'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    user: "20000:20000"
+    ports:
+      - "5000:5000"
+      - "8080:8080"
+    volumes:
+      - /jenkins:/var/jenkins_home
+EOF
+
+docker-compose -f jenkins-compose.json up
+
+
+
+SLAVE
+Create LXC - Add Features keyctl / Nesting - start LXC
+ssh> 
+apt-update && apt upgrade
+apt install vim mc net-tools curl openjdk-8-jdk -y
+java -version
+useradd -d /home/jenkins -s /bin/bash jenkins
+mkdir /home/jenkins
+chown jenkins:jenkins /home/jenkins/
+su -l jenkins
+vim .ssh/authorized_keys

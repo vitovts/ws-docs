@@ -1,0 +1,22 @@
+ansible-playbook play/pve-create-lxc-v1.yml --ask-vault-password
+ansible-playbook play/jn-master-inst-ub.yml --ask-vault-password
+ansible-playbook play/jn-master-config-ub.yml --ask-vault-password
+ssh ... 
+ssh-keygen -t rsa -b 4096 -C “jenkins"
+create and add node
+configure node 
+ansible-playbook play/jn-slave-config-ub.yml --ask-vault-password
++ public + hosts + 
+add credential to jn-ws (pivate)
+
+plugin
+- Publish Over SSH
+- SSH Agent
+- docker-pipeline
+
+
+
+trigger
+curl http://jnuser:xxxxxxxxxxx@ip:8080/job/trigger/job/trigger1/build?token=trigger
+curl http://jnuser:xxxxxxxxxxx@jenkins.com/job/trigger/job/trigger1/build?token=trigger
+
